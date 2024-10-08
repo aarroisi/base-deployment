@@ -1,43 +1,41 @@
 # Stage 1: Builder
-FROM docker:26.1.3-dind-alpine3.19 AS builder
+FROM docker:24-dind AS builder
 
 # Set environment variables for Ruby gems
 ENV GEM_HOME=/usr/local/bundle
 ENV PATH=$GEM_HOME/bin:$PATH
 
-# Create GEM_HOME directory
-RUN mkdir -p /usr/local/bundle
-
 # Install build dependencies and Ruby gems
-RUN apk update && \
-    apk add --no-cache \
-    build-base \
-    ruby-dev && \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    ruby-dev \
+    ca-certificates && \
     gem install kamal --no-document && \
-    # Clean up build dependencies and APK cache to reduce image size
-    apk del build-base ruby-dev && \
-    rm -rf /var/cache/apk/*
+    # Clean up build dependencies to reduce image size
+    apt-get remove -y build-essential ruby-dev && \
+    apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
 
 # Stage 2: Final Image
-FROM docker:26.1.3-dind-alpine3.19
+FROM docker:24-dind
+
 LABEL org.opencontainers.image.authors="arman@icasia.id"
 
 # Set environment variables for Ruby gems
 ENV GEM_HOME=/usr/local/bundle
 ENV PATH=$GEM_HOME/bin:$PATH
 
-# Create GEM_HOME directory
-RUN mkdir -p /usr/local/bundle
-
 # Install runtime dependencies and Ruby runtime
-RUN apk update && \
-    apk add --no-cache \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
     ruby \
-    aws-cli \
+    awscli \
     git \
     curl && \
-    # Clean up APK cache to reduce image size
-    rm -rf /var/cache/apk/*
+    rm -rf /var/lib/apt/lists/*
 
 # Copy the Ruby gems from the builder stage
 COPY --from=builder /usr/local/bundle /usr/local/bundle
+
+# Use the default entrypoint and command from the base image
