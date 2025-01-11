@@ -13,7 +13,7 @@ RUN apt-get update && \
     ca-certificates \
     curl
 
-RUN gem install kamal -v 2.2.2 --no-document
+RUN gem install kamal -v 2.4.0 --no-document
 
 # Clean up build dependencies to reduce image size
 RUN apt-get remove -y build-essential ruby-dev && \
