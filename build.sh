@@ -1,1 +1,1 @@
-docker buildx build --platform linux/amd64 -t $USERNAME/base-deployment:latest --push .
+docker buildx build --platform linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:latest --push .
